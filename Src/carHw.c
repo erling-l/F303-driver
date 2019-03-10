@@ -24,7 +24,17 @@ void USART3_IRQHandler(void);
 //volatile int tx_out=0;
 //volatile int rx_in=0;
 //volatile int rx_out=0;
-
+extern uint8_t received[];
+uint8_t receivedParam[100];
+uint8_t *receivedParamStartPtr = &receivedParam[0];
+uint8_t *receivedParamEndPtr = &receivedParam[0];
+static uint8_t tmp;
+extern uint8_t num_rx_rounds;
+extern int param1;
+extern int param2;
+extern int param3;
+extern char parameterType[];
+int parametersReceived =0;
 /* Private function prototypes -----------------------------------------------*/
 //static void SemaphoreTest(void const *argument);
 void SystemClock_Config(void);
@@ -46,7 +56,7 @@ osSemaphoreDef(SEM);
 
 /* UART handler declaration */
 UART_HandleTypeDef UartHandle;
-const int RXBUFFERSIZE = 100;
+const int RXBUFFERSIZE = 10;
 const int TXBUFFERSIZE = 60;
 /* Buffer used for transmission */
 uint8_t aTxBuffer3[] = " **** UART_TwoBoards_ComPolling ****   **** UART_TwoBoards_ComPolling **** ";
@@ -69,7 +79,7 @@ void runCarHw(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huartTx) {
 	long power;
 	long steeringAngle;
 	power = 100;
-	steeringAngle = 100;
+	steeringAngle = 150;
 	/* Power definition */
 	//	   Power.startMarker ='<';
 	//	   Power.command = power;
@@ -89,22 +99,45 @@ void runCarHw(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huartTx) {
 	pos = pos + length+1;
 	aTxBuffer3[pos] = (uint8_t) '>';
 
-	//		  if(HAL_UART_Transmit(huart1, (uint8_t*)aTxBuffer, 70, 5000)!= HAL_OK)
-	//		    {
-	//		  //    Error_Handler();
-	//		    }
-	if(HAL_UART_Transmit(huartTx, (uint8_t*)aTxBuffer3, pos+1, 5000)!= HAL_OK)
-	{
-		Error_Handler();
+	//			  if(HAL_UART_Transmit(huart1, (uint8_t*)aTxBuffer, 70, 5000)!= HAL_OK)
+	//			    {
+	//			  //    Error_Handler();
+	//			    }
+	if(num_rx_rounds<=1){
+		if(HAL_UART_Transmit(huartTx, (uint8_t*)aTxBuffer3, pos+1, 5000)!= HAL_OK)
+		{
+			Error_Handler();
+		}
+	} else {
+		aTxBuffer3[0] = parameterType[0];
+		length = myItoa (param1+45,buf);
+				memcpy(&aTxBuffer3[1], &buf[0], length+1);
+				pos = length+2;
+				length = myItoa (param2,buf);
+				memcpy(&aTxBuffer3[pos], &buf[0], length+1);
+				pos = pos + length+1;
+				length = myItoa (param3,buf);
+				memcpy(&aTxBuffer3[pos], &buf[0], length+1);
+				pos = pos + length+1;
+		if (parametersReceived == 1){
+
+			memcpy(&aTxBuffer3[pos], &receivedParam[0], num_rx_rounds);
+			if(HAL_UART_Transmit(huartTx, (uint8_t*)aTxBuffer3, num_rx_rounds+ pos, 5000)!= HAL_OK)
+			{
+				HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+				Error_Handler();
+			}
+		}
 	}
-//	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-//	  osDelay(300);
+
+	//	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	osDelay(1000);
 
 
-//	if(HAL_UART_Receive(huartTx, (uint8_t*)aRxBuffer3, pos+1, 5000)!= HAL_OK)
-//	{
-//		Error_Handler();
-//	}
+	//	if(HAL_UART_Receive(huartRx, (uint8_t*)aRxBuffer3, pos+1, 5000)!= HAL_OK)
+	//	{
+	//		Error_Handler();
+	//	}
 
 }
 
@@ -138,6 +171,38 @@ int myItoa(int value,char *ptr)
 	}
 	return count;
 }
+void HAL_UART_RxCpltCallback (UART_HandleTypeDef *huart)
+{
+	tmp = *(huart->pRxBuffPtr);
+	if (tmp == '<'){
+		receivedParamEndPtr =&receivedParam[0];
+		num_rx_rounds = 0;
+	} else if (tmp == '>'){
+		parametersReceived = 1;
+		*receivedParamEndPtr++ = tmp;
+		*receivedParamEndPtr = '\0'; // String end
+		num_rx_rounds+=2;
+	}else {
+	*receivedParamEndPtr++ = tmp;
+	num_rx_rounds++;
+	}
+
+	// don't need to do anything. DMA is circular
+}
+void HAL_UART_Error (UART_HandleTypeDef *huart)
+{
+	num_rx_rounds++;
+	// don't need to do anything. DMA is circular
+	for(;;)
+	{
+		//		GPIO_Write(LD2_GPIO_Port, LD2_Pin,GPIO_BIT_SET);
+		//		HAL_GPIO_DeInit(LD2_GPIO_Port, LD2_Pin);
+		//		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		osDelay(100);
+
+	}
+}
 /**
  * @brief  Semaphore Test.
  * @param  argument: Not used
@@ -160,15 +225,6 @@ int myItoa(int value,char *ptr)
 //	}
 //}
 
-
-
-
-
-
-
-
-
-
 /* For what it's worth, I have a working UART implementation using the DMA - but *only* in circular mode.  It
 avoids the ISR LOCK problem.
 
@@ -181,7 +237,7 @@ part where they didn't want to write a separate function that excluded the point
 requires a separate small receive buffer.
 
 Example of (possible) error:
-**/
+ **/
 
 /* initial call */
 //
@@ -205,4 +261,5 @@ I have had 100% success with using only the RECEIVE on DMA.  The transmit still 
 largely because the transmit isn't re-cocked inside the ISR - whereas the receive must be.  I
 have had several UARTS simultaneously receiving and transmitting for days on end at 115.2K baud
 using common (shared) call-back functions.
-**/
+ **/
+

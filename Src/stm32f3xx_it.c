@@ -37,10 +37,8 @@
 #include "main.h"
 #include "stm32f3xx_it.h"
 #include "cmsis_os.h"
-#include "stm32f3xx_hal.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,12 +73,57 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern DMA_HandleTypeDef hdma_usart3_rx;
 /* USER CODE BEGIN EV */
+///* The fault handler implementation calls a function called
+//prvGetRegistersFromStack(). */
+//static void HardFault_Handler(void)
+//{
+//    __asm volatile
+//    (
+//        " tst lr, #4                                                \n"
+//        " ite eq                                                    \n"
+//        " mrseq r0, msp                                             \n"
+//        " mrsne r0, psp                                             \n"
+//        " ldr r1, [r0, #24]                                         \n"
+//        " ldr r2, handler2_address_const                            \n"
+//        " bx r2                                                     \n"
+//        " handler2_address_const: .word prvGetRegistersFromStack    \n"
+//    );
+//}
+//void prvGetRegistersFromStack( uint32_t *pulFaultStackAddress )
+//{
+///* These are volatile to try and prevent the compiler/linker optimising them
+//away as the variables never actually get used.  If the debugger won't show the
+//values of the variables, make them global my moving their declaration outside
+//of this function. */
+//volatile uint32_t r0;
+//volatile uint32_t r1;
+//volatile uint32_t r2;
+//volatile uint32_t r3;
+//volatile uint32_t r12;
+//volatile uint32_t lr; /* Link register. */
+//volatile uint32_t pc; /* Program counter. */
+//volatile uint32_t psr;/* Program status register. */
+//
+//    r0 = pulFaultStackAddress[ 0 ];
+//    r1 = pulFaultStackAddress[ 1 ];
+//    r2 = pulFaultStackAddress[ 2 ];
+//    r3 = pulFaultStackAddress[ 3 ];
+//
+//    r12 = pulFaultStackAddress[ 4 ];
+//    lr = pulFaultStackAddress[ 5 ];
+//    pc = pulFaultStackAddress[ 6 ];
+//    psr = pulFaultStackAddress[ 7 ];
+//
+//    /* When the following line is hit, the variables contain the register values. */
+//    for( ;; );
+//}
 
 /* USER CODE END EV */
 
 /******************************************************************************/
-/*           Cortex-M4 Processor Interruption and Exception Handlers          */ 
+/*           Cortex-M4 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
   * @brief This function handles Non maskable interrupt.
@@ -95,20 +138,37 @@ void NMI_Handler(void)
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
-/**
-  * @brief This function handles Hard fault interrupt.
-  */
-void HardFault_Handler(void)
-{
-  /* USER CODE BEGIN HardFault_IRQn 0 */
 
-  /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-    /* USER CODE END W1_HardFault_IRQn 0 */
-  }
-}
+///**
+//  * @brief This function handles Hard fault interrupt.
+//  */
+//void HardFault_Handler(void)
+//{
+//  /* USER CODE BEGIN HardFault_IRQn 0 */
+//	  /* Load the address of the interrupt control register into r3. */
+//	  ldr r3, NVIC_INT_CTRL_CONST
+//	  /* Load the value of the interrupt control register into r2 from the
+//	  address held in r3. */
+//	  ldr r2, [r3, #0]
+//	  /* The interrupt number is in the least significant byte - clear all
+//	  other bits. */
+//	  uxtb r2, r2
+//	Infinite_Loop:
+//	  /* Now sit in an infinite loop - the number of the executing interrupt
+//	  is held in r2. */
+//	  b  Infinite_Loop
+//	  .size  Default_Handler, .-Default_Handler
+//
+//	.align 4
+//	/* The address of the NVIC interrupt control register. */
+//	NVIC_INT_CTRL_CONST: .word 0xe000ed04
+//  /* USER CODE END HardFault_IRQn 0 */
+//  while (1)
+//  {
+//    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+//    /* USER CODE END W1_HardFault_IRQn 0 */
+//  }
+//}
 
 /**
   * @brief This function handles Memory management fault.
@@ -190,14 +250,28 @@ void SysTick_Handler(void)
 /* please refer to the startup file (startup_stm32f3xx.s).                    */
 /******************************************************************************/
 
-/* USER CODE BEGIN 1 */
-/**********************************************************
- * UART3 interrupt request handler: on reception of a
- * character 't', toggle LED and transmit a character 'T'
- *********************************************************/
-void USART3_IRQHandler(void)
+/**
+  * @brief This function handles DMA1 channel3 global interrupt.
+  */
+void DMA1_Channel3_IRQHandler(void)
 {
-  HAL_UART_IRQHandler(&huart3);
+  /* USER CODE BEGIN DMA1_Channel3_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel3_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart3_rx);
+  /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel3_IRQn 1 */
 }
+
+/* USER CODE BEGIN 1 */
+///**********************************************************
+// * UART3 interrupt request handler: on reception of a
+// * character 't', toggle LED and transmit a character 'T'
+// *********************************************************/
+//void USART3_IRQHandler(void)
+//{
+//  HAL_UART_IRQHandler(&huart3);
+//}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -7,6 +7,7 @@
 
 #ifndef EXTENVIRONMENT_H_
 #define EXTENVIRONMENT_H_
+#include <stdbool.h>
 struct leftWall {
 	long distance;
 	long previousDistance;
@@ -20,20 +21,21 @@ struct obstacle1 {
 	long previousDistance;
 	long distanceToLeftWall;
 	long distanceToRightWall;
-	long angleToLeftWall;
-	long angleToRightWall;
+	long angleToLeftCorner;
+	long angleToRightCorner;
 };
 struct car {
 	long speed;
 	long directionX;
 	long directionY;
 	long directionZ;
-	_Bool left;
-	_Bool right;
-	_Bool front;
-	_Bool back;
+	bool left;
+	bool right;
+	bool front;
+	bool back;
 
 };
 void runExtEnvironment(void);
+char *strtok(char *str, const char *delim);
 
 #endif /* EXTENVIRONMENT_H_ */
