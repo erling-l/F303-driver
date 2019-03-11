@@ -1,0 +1,62 @@
+Här kommer vad jag har totat ihop hittills om The BOX car, synpunkter och vettiga och intelligent regler för styrning mottages tacksamt:
+
+ 
+
+The BOX car
+
+HW
+
+Radiostyrd bil 150 * 200 mm innehåller kraftelektronik (H-brygga) för 2 borstade elmotorer resten borttaget.
+
+Arduino Uno med adapterkort.
+
+ST avståndssensor xxxxx
+
+Tackometer
+
+Servo för att rikta avståndssensorn, behöver bytas ut mot ett 180 graders servo.
+
+STM32 Nucleo F303RE även kallad carBrain
+
+Tillägg som behövs:
+
+Kompass
+
+Gyro
+
+5 ST avståndssensorer kopplade direkt till F303RE
+
+Ny bottenplatta med högre frigång
+
+SW
+
+Arduinon innehåller mjukvara som interfacar alla sensorer och motorer samt kommunikation med F303RE carBrain.
+
+F303RE carBrain innehåller kommunikation med Arduinon och 3 processer:
+
+Kommunikation med Arduino benämd comHW
+Omvärldsmodell benämd EnvironmentModel
+Förarmodell benämd Driver
+comHW
+
+Kommunicerar mellan Arduino och övriga processer.
+
+EnvironmentModel
+
+Modellerar bilens omvärld i form av object ”structs” för vänster vägg, höger vägg och hinder upp till 4 hinder kan vara aktiva samtidigt.
+
+Väggattribut: avstånd, svängriktning, historik
+
+Hinderattribut: avstånd, riktning vänster hörn, riktning höger hörn, avstånd till vänster vägg, avstånd till höger vägg.
+
+Driver
+
+Modellerar bilen och tar beslut.
+
+Bilattribut: fart, riktning, riktningsförändring, kollision, historik
+
+Beslut: öka, minska farten, styra höger, styra vänster
+
+Regler: Om fri sikt ingen kurva öka farten styr rakt. Om kollision hitta föregående riktning etablera position hitta banans fortsättning. Om hinder välj sida med störst utrymme (alternativt välj yttervägg.).
+
+ 

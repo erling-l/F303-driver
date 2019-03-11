@@ -110,7 +110,7 @@ void runCarHw(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huartTx) {
 		}
 	} else {
 		aTxBuffer3[0] = parameterType[0];
-		length = myItoa (param1+45,buf);
+		length = myItoa (param1,buf);
 				memcpy(&aTxBuffer3[1], &buf[0], length+1);
 				pos = length+2;
 				length = myItoa (param2,buf);
