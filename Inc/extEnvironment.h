@@ -8,33 +8,49 @@
 #ifndef EXTENVIRONMENT_H_
 #define EXTENVIRONMENT_H_
 #include <stdbool.h>
-struct leftWall {
+typedef struct  {
 	long distance;
 	long previousDistance;
-};
-struct rightWall {
-	long distance;
-	long previousDistance;
-};
-struct obstacle1 {
-	long distance;
-	long previousDistance;
-	long distanceToLeftWall;
-	long distanceToRightWall;
-	long angleToLeftCorner;
-	long angleToRightCorner;
-};
-struct car {
+}Wall;
+
+//typedef struct  {
+//	long distanceToLeftWall; // not used
+//	long distanceToRightWall;  // not used
+//	long angleToLeftCorner;
+//	long angleToRightCorner;
+//	long distance;
+//	long previousDistance;
+//	int angle;
+//}obstacle;
+//typedef struct  {
+//	long speed;
+//	long directionX;
+//	long directionY;
+//	long directionZ;
+//	bool left;
+//	bool right;
+//	bool front;
+//	bool back;
+//
+//} car;
+//typedef struct  {
+//	long timestamp;
+//	car myCar;
+//	obstacle leftWall;
+//	obstacle rightWall;
+//	obstacle obstacle1[5];
+//}timeFrame;
+typedef struct  {
+	long timestamp;
 	long speed;
 	long directionX;
 	long directionY;
 	long directionZ;
-	bool left;
-	bool right;
-	bool front;
-	bool back;
+	long distance;
+	int angle;
+}obstacle;
 
-};
+int obstacles;
 void runExtEnvironment(void);
 char *strtok(char *str, const char *delim);
 

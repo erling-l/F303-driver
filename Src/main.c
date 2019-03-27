@@ -54,6 +54,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <malloc.h>
 #include "carHw.h"
 #include "driver.h"
 #include "extEnvironment.h"
@@ -61,7 +62,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+extern obstacle *obstacleList[];
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -139,7 +140,19 @@ int main(void)
 
 {
   /* USER CODE BEGIN 1 */
-
+	char tmpString[28];
+	int n;
+//	char *tmpPtr;
+	obstacle *xy;
+	extern obstacle *obstacleList[40];
+	for (int i =0; i < 40; i++ ){
+		xy = (obstacle *) malloc (sizeof(obstacle));
+	obstacleList[i] = xy;
+//		obstacleList[i]->
+	obstacleList[i]->timestamp = 0;
+	obstacleList[i]->speed = i;
+	n = sprintf(tmpString,"ObstaclePointer %d", (int) (obstacleList[i]));
+	}
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/

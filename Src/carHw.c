@@ -111,14 +111,14 @@ void runCarHw(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huartTx) {
 	} else {
 		aTxBuffer3[0] = parameterType[0];
 		length = myItoa (param1,buf);
-				memcpy(&aTxBuffer3[1], &buf[0], length+1);
-				pos = length+2;
-				length = myItoa (param2,buf);
-				memcpy(&aTxBuffer3[pos], &buf[0], length+1);
-				pos = pos + length+1;
-				length = myItoa (param3,buf);
-				memcpy(&aTxBuffer3[pos], &buf[0], length+1);
-				pos = pos + length+1;
+		memcpy(&aTxBuffer3[1], &buf[0], length+1);
+		pos = length+2;
+		length = myItoa (param2,buf);
+		memcpy(&aTxBuffer3[pos], &buf[0], length+1);
+		pos = pos + length+1;
+		length = myItoa (param3,buf);
+		memcpy(&aTxBuffer3[pos], &buf[0], length+1);
+		pos = pos + length+1;
 		if (parametersReceived == 1){
 
 			memcpy(&aTxBuffer3[pos], &receivedParam[0], num_rx_rounds);
@@ -173,20 +173,27 @@ int myItoa(int value,char *ptr)
 }
 void HAL_UART_RxCpltCallback (UART_HandleTypeDef *huart)
 {
-	tmp = *(huart->pRxBuffPtr);
-	if (tmp == '<'){
-		receivedParamEndPtr =&receivedParam[0];
-		num_rx_rounds = 0;
-	} else if (tmp == '>'){
-		parametersReceived = 1;
-		*receivedParamEndPtr++ = tmp;
-		*receivedParamEndPtr = '\0'; // String end
-		num_rx_rounds+=2;
-	}else {
-	*receivedParamEndPtr++ = tmp;
-	num_rx_rounds++;
+	if (huart->Instance == USART3) {
+		tmp = *(huart->pRxBuffPtr);
+		if (tmp == '<'){
+			receivedParamEndPtr =&receivedParam[0];
+			num_rx_rounds = 0;
+		} else if (tmp == '>'){
+			parametersReceived = 1;
+			*receivedParamEndPtr++ = tmp;
+			*receivedParamEndPtr = '\0'; // String end
+			num_rx_rounds+=2;
+		}else {
+			*receivedParamEndPtr++ = tmp;
+			num_rx_rounds++;
+		}
 	}
+	if (huart->Instance == USART2) {
+		tmp = *(huart->pRxBuffPtr);
+		if (tmp == '<'){
 
+		}
+	}
 	// don't need to do anything. DMA is circular
 }
 void HAL_UART_Error (UART_HandleTypeDef *huart)

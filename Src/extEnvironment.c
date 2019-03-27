@@ -3,20 +3,25 @@
  *
  *  Created on: 10 feb. 2019
  *      Author: erlin
+ *      http://www.nada.kth.se/kurser/master/intro/libc/libc_7.html
  */
 #include <QMC5883L.h>
 #include "extEnvironment.h"
+#include <malloc.h>
 #include <stdbool.h>
 #include <string.h>
 char receivedChars[100];
 int param1;
 int param2;
 int param3;
+int firstObject = 0;
+int lastObject = 0;
 char parameterType[2];
 extern uint8_t receivedParam[];
 uint8_t *receivedParamPtr;
 extern uint8_t *receivedParamStartPtr;
 extern uint8_t *receivedParamEndPtr;
+obstacle *obstacleList[40];
 bool newData = false;
 void readEnvironment();
 void readWithStartEndMarkers();
@@ -44,6 +49,23 @@ void digitalCompass(){
 }
 void readEnvironment(){
 
+if (parameterType[0] == 'D') {
+	obstacleList[firstObject]->distance = param1;
+	obstacleList[firstObject]->angle = param2;
+
+//	firstObject += 1;
+	if (firstObject >= 40){
+//		firstObject =0;
+	}
+	if (firstObject >= lastObject){
+//		lastObject +=1;
+		if (lastObject >= 40){
+//			lastObject = 0;
+		}
+	}
+} else if (parameterType[0] == 'T'){
+
+}
 
 }
 void readWithStartEndMarkers() {
