@@ -58,6 +58,8 @@
 #include "carHw.h"
 #include "driver.h"
 #include "extEnvironment.h"
+#include <QMC5883L.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -98,6 +100,8 @@ uint8_t aTxBuffer[] = " **** UART_TwoBoards_ComPolling ****   **** UART_TwoBoard
 
 /* Buffer used for reception */
 uint8_t aRxBuffer[100];
+uint8_t aRx2Buffer[100];
+uint8_t aRx1Buffer[100];
 /*define a global to hold the buffer as well as a circle count*/
 uint8_t received[] = "           \n\r";
 uint8_t num_rx_rounds = 0;
@@ -137,22 +141,23 @@ void StartExtEnvTask(void const * argument);
   * @retval int
   */
 int main(void)
-
 {
   /* USER CODE BEGIN 1 */
 	char tmpString[28];
 	int n;
-//	char *tmpPtr;
+	//	char *tmpPtr;
 	obstacle *xy;
 	extern obstacle *obstacleList[40];
 	for (int i =0; i < 40; i++ ){
 		xy = (obstacle *) malloc (sizeof(obstacle));
-	obstacleList[i] = xy;
-//		obstacleList[i]->
-	obstacleList[i]->timestamp = 0;
-	obstacleList[i]->speed = i;
-	n = sprintf(tmpString,"ObstaclePointer %d", (int) (obstacleList[i]));
+		obstacleList[i] = xy;
+		//		obstacleList[i]->
+		obstacleList[i]->timestamp = 0;
+		obstacleList[i]->speed = i;
+		n = sprintf(tmpString,"ObstaclePointer %d", (int) (obstacleList[i]));
 	}
+	QMC5883L_Initialize(MODE_CONTROL_CONTINUOUS, OUTPUT_DATA_RATE_200HZ, FULL_SCALE_2G, OVER_SAMPLE_RATIO_128);
+	QMC5883L_Reset();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -179,11 +184,11 @@ int main(void)
   MX_USART3_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-//  HAL_UART_Receive_DMA(&huart3, received, sizeof(received)-3);
-  HAL_UART_Receive_DMA(&huart3, received, 1);
+	//  HAL_UART_Receive_DMA(&huart3, received, sizeof(received)-3);
+	HAL_UART_Receive_DMA(&huart3, received, 1);
 	//USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-	    /* Enable USART1 global interrupt */
-//	    NVIC_EnableIRQ(USART3_IRQn);
+	/* Enable USART1 global interrupt */
+	//	    NVIC_EnableIRQ(USART3_IRQn);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -227,22 +232,22 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
-//	/* Create the queue used by the two tasks to pass the incrementing number.
-//	   Pass a pointer to the queue in the parameter structure */
-//	osMessageQDef(osqueue, QUEUE_SIZE, uint16_t);
-//	osQueue = osMessageCreate(osMessageQ(osqueue), NULL);
-//	/* Create the queue used by the two tasks to pass the incrementing number.
-//	   Pass a pointer to the queue in the parameter structure */
-//	osMessageQDef(cmdqueue, QUEUE_SIZE, uint16_t);
-//	cmdQueueHandle = osMessageCreate(osMessageQ(cmdqueue), NULL);
-//
-//	/* Note that the producer has a lower priority than the consumer when the tasks are
-//	     spawned */
-//	osThreadDef(QCons, MessageQueueConsumer, osPriorityBelowNormal, 0, blckqSTACK_SIZE);
-//	osThreadCreate(osThread(QCons), NULL);
-//
-//	osThreadDef(QProd, MessageQueueProducer, osPriorityBelowNormal, 0, blckqSTACK_SIZE);
-//	osThreadCreate(osThread(QProd), NULL);
+	//	/* Create the queue used by the two tasks to pass the incrementing number.
+	//	   Pass a pointer to the queue in the parameter structure */
+	//	osMessageQDef(osqueue, QUEUE_SIZE, uint16_t);
+	//	osQueue = osMessageCreate(osMessageQ(osqueue), NULL);
+	//	/* Create the queue used by the two tasks to pass the incrementing number.
+	//	   Pass a pointer to the queue in the parameter structure */
+	//	osMessageQDef(cmdqueue, QUEUE_SIZE, uint16_t);
+	//	cmdQueueHandle = osMessageCreate(osMessageQ(cmdqueue), NULL);
+	//
+	//	/* Note that the producer has a lower priority than the consumer when the tasks are
+	//	     spawned */
+	//	osThreadDef(QCons, MessageQueueConsumer, osPriorityBelowNormal, 0, blckqSTACK_SIZE);
+	//	osThreadCreate(osThread(QCons), NULL);
+	//
+	//	osThreadDef(QProd, MessageQueueProducer, osPriorityBelowNormal, 0, blckqSTACK_SIZE);
+	//	osThreadCreate(osThread(QProd), NULL);
 
   /* USER CODE END RTOS_QUEUES */
  
@@ -335,22 +340,22 @@ static void MX_I2C1_Init(void)
   hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
   hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-//  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /**Configure Analogue filter 
   */
-//  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /**Configure Digital filter 
   */
-//  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
@@ -370,11 +375,13 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE END USART1_Init 0 */
 
   /* USER CODE BEGIN USART1_Init 1 */
+	huart2.pRxBuffPtr = &aRx1Buffer[0];
+	huart2.RxXferSize = 100;
 	//  huart1.Init.BaudRate = 38400;
 	//	  huart1.Init.BaudRate = 9600;
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 38400;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -406,6 +413,8 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE END USART2_Init 0 */
 
   /* USER CODE BEGIN USART2_Init 1 */
+	huart2.pRxBuffPtr = &aRx2Buffer[0];
+	huart2.RxXferSize = 100;
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
@@ -441,8 +450,8 @@ static void MX_USART3_UART_Init(void)
   /* USER CODE END USART3_Init 0 */
 
   /* USER CODE BEGIN USART3_Init 1 */
-    huart3.pRxBuffPtr = &aRxBuffer[0];
-    huart3.RxXferSize = 100;
+	huart3.pRxBuffPtr = &aRxBuffer[0];
+	huart3.RxXferSize = 100;
   /* USER CODE END USART3_Init 1 */
   huart3.Instance = USART3;
   huart3.Init.BaudRate = 9600;
@@ -495,20 +504,20 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
+  /*Configure GPIO pin : PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
 
@@ -533,7 +542,7 @@ void StartDefaultTask(void const * argument)
 	{
 
 		runCarHw(&huart1, &huart3);
-		osDelay(1);
+		osDelay(10);
 	}
   /* USER CODE END 5 */ 
 }
@@ -552,13 +561,13 @@ void StartDriver(void const * argument)
 	for(;;)
 	{
 		//		GPIO_Write(LD2_GPIO_Port, LD2_Pin,GPIO_BIT_SET);
-//		HAL_GPIO_DeInit(LD2_GPIO_Port, LD2_Pin);
-//		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		//		HAL_GPIO_DeInit(LD2_GPIO_Port, LD2_Pin);
+		//		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 		//	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 		//	  osDelay(300);
 
 		runDriver();
-		osDelay(1);
+		osDelay(10);
 	}
   /* USER CODE END StartDriver */
 }
@@ -577,7 +586,7 @@ void StartExtEnvTask(void const * argument)
 	for(;;)
 	{
 		runExtEnvironment();
-		osDelay(1);
+		osDelay(10);
 	}
   /* USER CODE END StartExtEnvTask */
 }

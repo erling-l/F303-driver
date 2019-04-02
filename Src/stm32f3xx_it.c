@@ -123,7 +123,7 @@ extern DMA_HandleTypeDef hdma_usart3_rx;
 /* USER CODE END EV */
 
 /******************************************************************************/
-/*           Cortex-M4 Processor Interruption and Exception Handlers          */
+/*           Cortex-M4 Processor Interruption and Exception Handlers          */ 
 /******************************************************************************/
 /**
   * @brief This function handles Non maskable interrupt.
@@ -138,13 +138,12 @@ void NMI_Handler(void)
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
-
-///**
-//  * @brief This function handles Hard fault interrupt.
-//  */
-//void HardFault_Handler(void)
-//{
-//  /* USER CODE BEGIN HardFault_IRQn 0 */
+/**
+  * @brief This function handles Hard fault interrupt.
+  */
+void HardFault_Handler(void)
+{
+  /* USER CODE BEGIN HardFault_IRQn 0 */
 //	  /* Load the address of the interrupt control register into r3. */
 //	  ldr r3, NVIC_INT_CTRL_CONST
 //	  /* Load the value of the interrupt control register into r2 from the
@@ -162,13 +161,13 @@ void NMI_Handler(void)
 //	.align 4
 //	/* The address of the NVIC interrupt control register. */
 //	NVIC_INT_CTRL_CONST: .word 0xe000ed04
-//  /* USER CODE END HardFault_IRQn 0 */
-//  while (1)
-//  {
-//    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-//    /* USER CODE END W1_HardFault_IRQn 0 */
-//  }
-//}
+  /* USER CODE END HardFault_IRQn 0 */
+  while (1)
+  {
+    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    /* USER CODE END W1_HardFault_IRQn 0 */
+  }
+}
 
 /**
   * @brief This function handles Memory management fault.

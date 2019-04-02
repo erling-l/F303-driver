@@ -17,8 +17,8 @@ void MessageQueueProducer(const void *argument)
        
       /* Switch On continuously LED2 to indicate error */
 		//		GPIO_Write(LD2_GPIO_Port, LD2_Pin,GPIO_BIT_SET);
-		HAL_GPIO_DeInit(LD2_GPIO_Port, LD2_Pin);
-		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_5);
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
     }
     else
     {
@@ -27,7 +27,7 @@ void MessageQueueProducer(const void *argument)
       ++ProducerValue;
 
       if( (ProducerErrors == 0) && (ConsumerErrors == 0) )
-      HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 //        BSP_LED_Toggle(LED2);
       osDelay(1000);
     }

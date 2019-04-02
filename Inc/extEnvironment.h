@@ -48,8 +48,11 @@ typedef struct  {
 	long directionZ;
 	long distance;
 	int angle;
+	int direction;
 }obstacle;
-
+obstacle *leftWall;
+obstacle *rightWall;
+int previousDistance;
 int obstacles;
 void runExtEnvironment(void);
 char *strtok(char *str, const char *delim);

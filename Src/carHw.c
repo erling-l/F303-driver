@@ -35,6 +35,11 @@ extern int param2;
 extern int param3;
 extern char parameterType[];
 int parametersReceived =0;
+int minAngleDistance = 1;
+int maxAngleDistance = 179;
+long power;
+long steeringAngle;
+
 /* Private function prototypes -----------------------------------------------*/
 //static void SemaphoreTest(void const *argument);
 void SystemClock_Config(void);
@@ -59,6 +64,7 @@ UART_HandleTypeDef UartHandle;
 const int RXBUFFERSIZE = 10;
 const int TXBUFFERSIZE = 60;
 /* Buffer used for transmission */
+uint8_t aTxBuffer2[] = " **** UART_TwoBoards_ComPolling ****   **** UART_TwoBoards_ComPolling **** ";
 uint8_t aTxBuffer3[] = " **** UART_TwoBoards_ComPolling ****   **** UART_TwoBoards_ComPolling **** ";
 
 /* Buffer used for reception */
@@ -73,13 +79,11 @@ void sendCommand( struct Command *command ) {
 
 
 }
-void runCarHw(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huartTx) {
+int sendCarCommand(UART_HandleTypeDef *huartTx){
 	//	   struct Command Power;        /* Declare power command -255 0 255 */
 	//   struct Command Direction;        /* Declare steering -100 0 100 */
-	long power;
-	long steeringAngle;
-	power = 100;
-	steeringAngle = 150;
+	power = 0;
+	steeringAngle = 0;
 	/* Power definition */
 	//	   Power.startMarker ='<';
 	//	   Power.command = power;
@@ -90,56 +94,77 @@ void runCarHw(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huartTx) {
 	aTxBuffer3[0] = (uint8_t) '<';
 	char buf[20];
 	int length = myItoa (power,buf);
-	int pos =1;
-	memcpy(&aTxBuffer3[pos], &buf[0], length+1);
-	pos = length+1;
-	aTxBuffer3[pos] = (uint8_t) ',';
+	int posLocal =1;
+	memcpy(&aTxBuffer3[posLocal], &buf[0], length+1);
+	posLocal = length+1;
+	aTxBuffer3[posLocal] = (uint8_t) ',';
+	posLocal +=1;
 	length = myItoa (steeringAngle,buf);
-	memcpy(&aTxBuffer3[pos], &buf[0], length+1);
-	pos = pos + length+1;
-	aTxBuffer3[pos] = (uint8_t) '>';
+	memcpy(&aTxBuffer3[posLocal], &buf[0], length+1);
+	posLocal = posLocal + length+1;
+	aTxBuffer3[posLocal] = (uint8_t) ',';
+	posLocal +=1;
+	length = myItoa (minAngleDistance,buf);
+	memcpy(&aTxBuffer3[posLocal], &buf[0], length+1);
+	posLocal = posLocal + length+1;
+	aTxBuffer3[posLocal] = (uint8_t) ',';
+	posLocal +=1;
+	length = myItoa (maxAngleDistance,buf);
+	memcpy(&aTxBuffer3[posLocal], &buf[0], length+1);
+	posLocal = posLocal + length+1;
+	aTxBuffer3[posLocal] = (uint8_t) ',';
+	posLocal +=1;
+	aTxBuffer3[posLocal] = (uint8_t) '>';
+	posLocal +=1;
+	aTxBuffer3[posLocal] = (uint8_t) '\n';
+	posLocal +=1;
 
-	//			  if(HAL_UART_Transmit(huart1, (uint8_t*)aTxBuffer, 70, 5000)!= HAL_OK)
-	//			    {
-	//			  //    Error_Handler();
-	//			    }
-	if(num_rx_rounds<=1){
-		if(HAL_UART_Transmit(huartTx, (uint8_t*)aTxBuffer3, pos+1, 5000)!= HAL_OK)
+	if(HAL_UART_Transmit(huartTx, (uint8_t*)aTxBuffer3, posLocal, 5000)!= HAL_OK)
+	{
+		Error_Handler();
+	}
+	return posLocal;
+
+}
+void sendDebugCommand(UART_HandleTypeDef *huartDebug,int tmpCh){
+	if(HAL_UART_Transmit(huartDebug, (uint8_t*)aTxBuffer2, tmpCh, 5000)!= HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+void sendDebugEnvironment(UART_HandleTypeDef *huartDebug){
+	// copy received integer parameters as text to transmit buffer
+	aTxBuffer2[0] = parameterType[0];
+	char buf[20];
+	int length = myItoa(param1,buf);
+	memcpy(&aTxBuffer2[1], &buf[0], length+1);
+	int pos = length+2;
+	length = myItoa(param2,buf);
+	memcpy(&aTxBuffer2[pos], &buf[0], length+1);
+	pos = pos + length+1;
+	length = myItoa(param3,buf);
+	memcpy(&aTxBuffer2[pos], &buf[0], length+1);
+	pos = pos + length+1;
+	if (parametersReceived == 1){
+
+		memcpy(&aTxBuffer2[pos], &receivedParam[0], num_rx_rounds);
+//		memcpy(&aTxBuffer2[0], &aTxBuffer3[0], pos +num_rx_rounds);
+		int tmp = pos + num_rx_rounds;
+		if(HAL_UART_Transmit(huartDebug, (uint8_t*)aTxBuffer2, tmp, 5000)!= HAL_OK)
 		{
 			Error_Handler();
 		}
-	} else {
-		aTxBuffer3[0] = parameterType[0];
-		length = myItoa (param1,buf);
-		memcpy(&aTxBuffer3[1], &buf[0], length+1);
-		pos = length+2;
-		length = myItoa (param2,buf);
-		memcpy(&aTxBuffer3[pos], &buf[0], length+1);
-		pos = pos + length+1;
-		length = myItoa (param3,buf);
-		memcpy(&aTxBuffer3[pos], &buf[0], length+1);
-		pos = pos + length+1;
-		if (parametersReceived == 1){
-
-			memcpy(&aTxBuffer3[pos], &receivedParam[0], num_rx_rounds);
-			if(HAL_UART_Transmit(huartTx, (uint8_t*)aTxBuffer3, num_rx_rounds+ pos, 5000)!= HAL_OK)
-			{
-				HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-				Error_Handler();
-			}
-		}
 	}
-
-	//	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	osDelay(1000);
-
-
-	//	if(HAL_UART_Receive(huartRx, (uint8_t*)aRxBuffer3, pos+1, 5000)!= HAL_OK)
-	//	{
-	//		Error_Handler();
-	//	}
-
 }
+void runCarHw(UART_HandleTypeDef *huartDebug, UART_HandleTypeDef *huartTx) {
+	//if(huartTx->RxState ==)
+	int pos = sendCarCommand(huartTx);
+//	memcpy(&aTxBuffer2[0], &aTxBuffer3[0], pos);
+	memcpy(aTxBuffer2, aTxBuffer3, pos);
+	sendDebugCommand(huartDebug, pos);
+//	sendDebugEnvironment(huartDebug);
+}
+
 
 /*Function return size of string and convert signed  *
  *integer to ascii value and store them in array of  *
@@ -205,7 +230,7 @@ void HAL_UART_Error (UART_HandleTypeDef *huart)
 		//		GPIO_Write(LD2_GPIO_Port, LD2_Pin,GPIO_BIT_SET);
 		//		HAL_GPIO_DeInit(LD2_GPIO_Port, LD2_Pin);
 		//		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 		osDelay(100);
 
 	}

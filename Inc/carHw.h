@@ -19,6 +19,8 @@ struct Command {
 	int param;
 	char endMarker;
 };
+int minAngleDistance;
+int maxAngleDistance;
 
 void runCarHw(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huart3);
 
