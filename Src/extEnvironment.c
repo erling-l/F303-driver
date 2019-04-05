@@ -4,6 +4,17 @@
  *  Created on: 10 feb. 2019
  *      Author: erlin
  *      http://www.nada.kth.se/kurser/master/intro/libc/libc_7.html
+ *
+ *      Procedure som räknar ut avståndet för 3 äldre punkter
+ *      utifrån åkt distans och ändrad vinkel för sensor och
+ *      för bil som resulterar i vägg vinkel för höger eller
+ *      vänster vägg wallAngle Angle from the car and angle
+ *      of the wall
+ *      gör om till x,y koordinater if point within collision
+ *      square avoid
+ *      linjär algebra
+ *
+ *
  */
 #include <QMC5883L.h>
 #include "extEnvironment.h"
@@ -87,7 +98,7 @@ void scanI2C(){
 	 	}
 }
 void readEnvironment(){
-
+//	parametersReceived = 0;
 	if (parameterType[0] == 'D') {
 		obstacleList[firstObject]->distance = param1;
 		obstacleList[firstObject]->angle = param2;

@@ -25,24 +25,24 @@ long previousPower;
 
 void runDriver() {
 	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	if (obstacleList[firstObject]->angle > 80 && obstacleList[firstObject]->angle < 100){
-		if (obstacleList[firstObject]->distance < 100){ // Stop and back out of trouble
-			power = -50;
+//	if (obstacleList[firstObject]->angle > 80 || obstacleList[firstObject]->angle < 100){
+		if (obstacleList[firstObject]->distance < 200){ // Stop and back out of trouble
+			power = -100;
 			steeringAngle = 127;
 		}else {
-			power =50;
+			power =100;
 			previousPower = power;
 			steeringAngle=0;
 		}
 		if (leftWall->distance < rightWall->distance){
 			power = previousPower;
-			steeringAngle=5;
+			steeringAngle=50;
 		}
 		if (leftWall->distance > rightWall->distance){
 			power = previousPower;
-			steeringAngle=-5;
+			steeringAngle=-50;
 		}
 
-	}
+//	}
 	//	  osDelay(600);
 }

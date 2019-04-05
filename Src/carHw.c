@@ -39,6 +39,8 @@ int minAngleDistance = 1;
 int maxAngleDistance = 179;
 long power;
 long steeringAngle;
+long lastSend;
+long minPeriodSend = 200;
 
 /* Private function prototypes -----------------------------------------------*/
 //static void SemaphoreTest(void const *argument);
@@ -82,8 +84,8 @@ void sendCommand( struct Command *command ) {
 int sendCarCommand(UART_HandleTypeDef *huartTx){
 	//	   struct Command Power;        /* Declare power command -255 0 255 */
 	//   struct Command Direction;        /* Declare steering -100 0 100 */
-	power = 0;
-	steeringAngle = 0;
+//	power = 0;
+//	steeringAngle = 0;
 	/* Power definition */
 	//	   Power.startMarker ='<';
 	//	   Power.command = power;
@@ -158,11 +160,19 @@ void sendDebugEnvironment(UART_HandleTypeDef *huartDebug){
 }
 void runCarHw(UART_HandleTypeDef *huartDebug, UART_HandleTypeDef *huartTx) {
 	//if(huartTx->RxState ==)
+//	long lastSend = xPortGetTickCount();
+	lastSend += 1;
+
+//	if( (xPortGetTickCount() - lastSend) > minPeriodSend) {
+		if( lastSend >= 40) {
+			lastSend = 0;
 	int pos = sendCarCommand(huartTx);
 //	memcpy(&aTxBuffer2[0], &aTxBuffer3[0], pos);
 	memcpy(aTxBuffer2, aTxBuffer3, pos);
-	sendDebugCommand(huartDebug, pos);
+
+//	sendDebugCommand(huartDebug, pos);
 //	sendDebugEnvironment(huartDebug);
+	}
 }
 
 
